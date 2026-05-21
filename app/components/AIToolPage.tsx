@@ -41,7 +41,7 @@ export default function AIToolPage({
         <a href="/dashboard" className="text-cyan-400">
           ← Back to Dashboard
         </a>
-        <UserButton afterSignOutUrl="/" />
+        <UserButton />
       </div>
 
       <section className="max-w-5xl mx-auto">
