@@ -24,20 +24,38 @@ export default function AIToolPage({
     setLoading(true);
     setResult("");
 
-    const res = await fetch("/api/ai", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ prompt }),
-    });
+    try {
+      const res = await fetch("/api/ai", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ prompt }),
+      });
 
-    const data = await res.json();
-    setResult(data.result || data.error || "No response generated.");
+      const data = await res.json();
+      setResult(data.result || data.error || "No response generated.");
+    } catch {
+      setResult("Something went wrong. Please try again.");
+    }
+
     setLoading(false);
   };
 
+  const copyAnswer = async () => {
+    if (!result) return;
+
+    await navigator.clipboard.writeText(result);
+    alert("Answer copied!");
+  };
+
+  const clearResult = () => {
+    setResult("");
+  };
+
   const exportAnswer = () => {
+    if (!result) return;
+
     const file = new Blob([result], {
       type: "text/plain",
     });
@@ -80,19 +98,35 @@ export default function AIToolPage({
           <button
             onClick={generateAI}
             disabled={loading}
-            className="mt-5 w-full bg-cyan-500 text-black py-4 rounded-2xl font-bold disabled:opacity-50"
+            className="mt-5 w-full bg-cyan-500 text-black py-4 rounded-2xl font-bold disabled:opacity-50 hover:scale-[1.01] transition"
           >
             {loading ? "Generating..." : "Generate"}
           </button>
 
           {result && (
             <>
-              <button
-                onClick={exportAnswer}
-                className="mt-5 w-full border border-cyan-400 text-cyan-400 py-3 rounded-2xl hover:bg-cyan-400 hover:text-black transition"
-              >
-                Export Answer
-              </button>
+              <div className="grid grid-cols-3 gap-3 mt-5">
+                <button
+                  onClick={copyAnswer}
+                  className="border border-white/10 py-3 rounded-2xl hover:bg-white/10 transition"
+                >
+                  Copy
+                </button>
+
+                <button
+                  onClick={clearResult}
+                  className="border border-red-400/20 text-red-300 py-3 rounded-2xl hover:bg-red-500/20 transition"
+                >
+                  Clear
+                </button>
+
+                <button
+                  onClick={exportAnswer}
+                  className="border border-cyan-400 text-cyan-400 py-3 rounded-2xl hover:bg-cyan-400 hover:text-black transition"
+                >
+                  Export
+                </button>
+              </div>
 
               <div className="mt-8 p-6 rounded-2xl bg-black border border-white/10 whitespace-pre-wrap text-gray-200">
                 {result}
