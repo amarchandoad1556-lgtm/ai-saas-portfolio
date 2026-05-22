@@ -20,9 +20,26 @@ export default function AIToolPage({
 
   const [thumbnailPrompt, setThumbnailPrompt] = useState("");
 
+  const [sceneIdeas, setSceneIdeas] = useState("");
+
+  const [voiceoverScript, setVoiceoverScript] = useState("");
+
+  const [language, setLanguage] = useState("English");
+
+  const [voiceStyle, setVoiceStyle] = useState(
+    "Documentary Narrator"
+  );
+
+  const [emotion, setEmotion] = useState("Dramatic");
+
   const [loading, setLoading] = useState(false);
 
-  const [thumbnailLoading, setThumbnailLoading] = useState(false);
+  const [thumbnailLoading, setThumbnailLoading] =
+    useState(false);
+
+  const [sceneLoading, setSceneLoading] = useState(false);
+
+  const [voiceLoading, setVoiceLoading] = useState(false);
 
   const generateAI = async () => {
     if (!prompt.trim()) return;
@@ -31,6 +48,8 @@ export default function AIToolPage({
 
     setResult("");
     setThumbnailPrompt("");
+    setSceneIdeas("");
+    setVoiceoverScript("");
 
     try {
       const res = await fetch("/api/ai", {
@@ -45,9 +64,11 @@ export default function AIToolPage({
 
       const data = await res.json();
 
-      setResult(data.result || data.error || "No response generated.");
+      setResult(
+        data.result || data.error || "No response generated."
+      );
     } catch {
-      setResult("Something went wrong. Please try again.");
+      setResult("Something went wrong.");
     }
 
     setLoading(false);
@@ -72,10 +93,9 @@ ${result}
 
 The thumbnail should be:
 - emotional
-- high CTR
-- cinematic lighting
-- expressive faces
+- cinematic
 - viral YouTube style
+- dramatic lighting
 - ultra detailed
 `,
         }),
@@ -84,13 +104,101 @@ The thumbnail should be:
       const data = await res.json();
 
       setThumbnailPrompt(
-        data.result || data.error || "No thumbnail prompt generated."
+        data.result || data.error || "No thumbnail generated."
       );
     } catch {
       setThumbnailPrompt("Something went wrong.");
     }
 
     setThumbnailLoading(false);
+  };
+
+  const generateScenes = async () => {
+    if (!result) return;
+
+    setSceneLoading(true);
+
+    try {
+      const res = await fetch("/api/ai", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          prompt: `
+Based on this script:
+
+${result}
+
+Generate cinematic movie scenes.
+
+For every scene include:
+- scene number
+- cinematic description
+- camera angle
+- lighting
+- environment
+- mood
+- visual style
+
+Make it cinematic and professional.
+`,
+        }),
+      });
+
+      const data = await res.json();
+
+      setSceneIdeas(
+        data.result || data.error || "No scenes generated."
+      );
+    } catch {
+      setSceneIdeas("Something went wrong.");
+    }
+
+    setSceneLoading(false);
+  };
+
+  const generateVoiceover = async () => {
+    if (!result) return;
+
+    setVoiceLoading(true);
+
+    try {
+      const res = await fetch("/api/ai", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          prompt: `
+Convert this content into a professional cinematic voiceover narration.
+
+CONTENT:
+${result}
+
+VOICE SETTINGS:
+Language: ${language}
+Voice Style: ${voiceStyle}
+Emotion: ${emotion}
+
+Make it sound like a professional narrator speaking for a YouTube documentary.
+Add pauses, emotional delivery, and cinematic narration style.
+`,
+        }),
+      });
+
+      const data = await res.json();
+
+      setVoiceoverScript(
+        data.result ||
+          data.error ||
+          "No voiceover generated."
+      );
+    } catch {
+      setVoiceoverScript("Something went wrong.");
+    }
+
+    setVoiceLoading(false);
   };
 
   const copyAnswer = async () => {
@@ -102,6 +210,8 @@ The thumbnail should be:
   const clearResult = () => {
     setResult("");
     setThumbnailPrompt("");
+    setSceneIdeas("");
+    setVoiceoverScript("");
   };
 
   const exportAnswer = () => {
@@ -124,7 +234,6 @@ The thumbnail should be:
 
   return (
     <main className="min-h-screen bg-black text-white p-8">
-      {/* TOP BAR */}
       <div className="flex justify-between items-center mb-10">
         <a href="/dashboard" className="text-cyan-400">
           ← Back to Dashboard
@@ -133,10 +242,8 @@ The thumbnail should be:
         <UserButton />
       </div>
 
-      {/* MAIN */}
       <section className="max-w-6xl mx-auto">
         <div className="rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-2xl">
-          {/* HEADER */}
           <div className="text-6xl">{icon}</div>
 
           <h1 className="text-5xl font-bold mt-6">
@@ -147,7 +254,6 @@ The thumbnail should be:
             {description}
           </p>
 
-          {/* INPUT */}
           <textarea
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
@@ -155,37 +261,34 @@ The thumbnail should be:
             className="w-full mt-8 p-5 rounded-2xl bg-black border border-white/10 outline-none"
           />
 
-          {/* GENERATE */}
           <button
             onClick={generateAI}
             disabled={loading}
-            className="mt-5 w-full bg-cyan-500 text-black py-4 rounded-2xl font-bold hover:scale-[1.01] transition disabled:opacity-50"
+            className="mt-5 w-full bg-cyan-500 text-black py-4 rounded-2xl font-bold"
           >
             {loading ? "Generating..." : "Generate"}
           </button>
 
-          {/* RESULT */}
           {result && (
             <>
-              {/* ACTION BUTTONS */}
-              <div className="grid md:grid-cols-4 gap-3 mt-6">
+              <div className="grid md:grid-cols-5 gap-3 mt-6">
                 <button
                   onClick={copyAnswer}
-                  className="border border-white/10 py-3 rounded-2xl hover:bg-white/10 transition"
+                  className="border border-white/10 py-3 rounded-2xl"
                 >
                   Copy
                 </button>
 
                 <button
                   onClick={clearResult}
-                  className="border border-red-400/20 text-red-300 py-3 rounded-2xl hover:bg-red-500/20 transition"
+                  className="border border-red-400/20 text-red-300 py-3 rounded-2xl"
                 >
                   Clear
                 </button>
 
                 <button
                   onClick={exportAnswer}
-                  className="border border-cyan-400 text-cyan-400 py-3 rounded-2xl hover:bg-cyan-400 hover:text-black transition"
+                  className="border border-cyan-400 text-cyan-400 py-3 rounded-2xl"
                 >
                   Export
                 </button>
@@ -193,20 +296,24 @@ The thumbnail should be:
                 <button
                   onClick={generateThumbnailPrompt}
                   disabled={thumbnailLoading}
-                  className="border border-yellow-400 text-yellow-300 py-3 rounded-2xl hover:bg-yellow-400 hover:text-black transition disabled:opacity-50"
+                  className="border border-yellow-400 text-yellow-300 py-3 rounded-2xl"
                 >
-                  {thumbnailLoading
-                    ? "Generating..."
-                    : "Generate Thumbnail"}
+                  Thumbnail
+                </button>
+
+                <button
+                  onClick={generateScenes}
+                  disabled={sceneLoading}
+                  className="border border-purple-400 text-purple-300 py-3 rounded-2xl"
+                >
+                  Scenes
                 </button>
               </div>
 
-              {/* SCRIPT RESULT */}
               <div className="mt-8 p-6 rounded-2xl bg-black border border-white/10 whitespace-pre-wrap text-gray-200">
                 {result}
               </div>
 
-              {/* THUMBNAIL PROMPT */}
               {thumbnailPrompt && (
                 <div className="mt-8 p-6 rounded-2xl border border-yellow-400/20 bg-yellow-500/5">
                   <h2 className="text-2xl font-bold text-yellow-300 mb-4">
@@ -215,6 +322,105 @@ The thumbnail should be:
 
                   <div className="whitespace-pre-wrap text-gray-200">
                     {thumbnailPrompt}
+                  </div>
+                </div>
+              )}
+
+              {sceneIdeas && (
+                <div className="mt-8 p-6 rounded-2xl border border-purple-400/20 bg-purple-500/5">
+                  <h2 className="text-2xl font-bold text-purple-300 mb-4">
+                    🎬 Cinematic Scene Ideas
+                  </h2>
+
+                  <div className="whitespace-pre-wrap text-gray-200">
+                    {sceneIdeas}
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-8 p-6 rounded-2xl border border-cyan-400/20 bg-cyan-500/5">
+                <h2 className="text-2xl font-bold text-cyan-300 mb-6">
+                  🎤 Voiceover Studio
+                </h2>
+
+                <div className="grid md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="text-sm text-gray-400">
+                      Language
+                    </label>
+
+                    <select
+                      value={language}
+                      onChange={(e) =>
+                        setLanguage(e.target.value)
+                      }
+                      className="w-full mt-2 p-3 rounded-xl bg-black border border-white/10"
+                    >
+                      <option>English</option>
+                      <option>Urdu</option>
+                      <option>Hindi</option>
+                      <option>Arabic</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-sm text-gray-400">
+                      Voice Style
+                    </label>
+
+                    <select
+                      value={voiceStyle}
+                      onChange={(e) =>
+                        setVoiceStyle(e.target.value)
+                      }
+                      className="w-full mt-2 p-3 rounded-xl bg-black border border-white/10"
+                    >
+                      <option>Documentary Narrator</option>
+                      <option>Cinematic Male</option>
+                      <option>Emotional Female</option>
+                      <option>Energetic YouTuber</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-sm text-gray-400">
+                      Emotion
+                    </label>
+
+                    <select
+                      value={emotion}
+                      onChange={(e) =>
+                        setEmotion(e.target.value)
+                      }
+                      className="w-full mt-2 p-3 rounded-xl bg-black border border-white/10"
+                    >
+                      <option>Dramatic</option>
+                      <option>Inspirational</option>
+                      <option>Dark</option>
+                      <option>Motivational</option>
+                    </select>
+                  </div>
+                </div>
+
+                <button
+                  onClick={generateVoiceover}
+                  disabled={voiceLoading}
+                  className="mt-6 w-full bg-cyan-500 text-black py-4 rounded-2xl font-bold"
+                >
+                  {voiceLoading
+                    ? "Generating Voiceover..."
+                    : "Generate Voiceover"}
+                </button>
+              </div>
+
+              {voiceoverScript && (
+                <div className="mt-8 p-6 rounded-2xl border border-cyan-400/20 bg-cyan-500/5">
+                  <h2 className="text-2xl font-bold text-cyan-300 mb-4">
+                    🎙 AI Voiceover Narration
+                  </h2>
+
+                  <div className="whitespace-pre-wrap text-gray-200">
+                    {voiceoverScript}
                   </div>
                 </div>
               )}
