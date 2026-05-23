@@ -1,376 +1,311 @@
-"use client";
+import {
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  UserButton,
+} from "@clerk/nextjs";
 
-import { useEffect, useState } from "react";
-import { UserButton } from "@clerk/nextjs";
-
-type Message = {
-  role: "user" | "ai";
-  content: string;
-};
-
-type Tool = {
-  title: string;
-  icon: string;
-  prompt: string;
-  description: string;
-  link: string;
-};
-
-export default function Dashboard() {
-  const [prompt, setPrompt] = useState("");
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [activeTool, setActiveTool] = useState("General AI");
-
-  const tools: Tool[] = [
+export default function Home() {
+  const features = [
     {
-      title: "General AI",
-      icon: "🤖",
-      description: "Ask anything and get smart answers.",
-      prompt: "",
-      link: "/dashboard",
-    },
-    {
-      title: "YouTube Script AI",
       icon: "🎬",
-      description: "Create video scripts and story ideas.",
-      prompt: "Write a YouTube script about ",
-      link: "/dashboard/youtube-script",
+      title: "Script Generator",
+      desc: "Create YouTube scripts, documentary narration, hooks, and outlines.",
     },
     {
-      title: "Startup Idea AI",
-      icon: "💡",
-      description: "Generate SaaS and business ideas.",
-      prompt: "Give me a profitable SaaS startup idea about ",
-      link: "/dashboard/startup-ideas",
-    },
-    {
-      title: "Content Writer",
-      icon: "✍️",
-      description: "Write blogs, posts, and marketing content.",
-      prompt: "Write high-quality content about ",
-      link: "/dashboard/content-writer",
-    },
-    {
+      icon: "🎨",
       title: "Thumbnail Prompt AI",
-      icon: "🖼️",
-      description: "Create AI image prompts for thumbnails.",
-      prompt: "Create a cinematic YouTube thumbnail prompt for ",
-      link: "/dashboard/thumbnail-prompt",
+      desc: "Generate cinematic, high-CTR thumbnail ideas and prompts.",
     },
     {
-      title: "Business Planner",
-      icon: "📈",
-      description: "Make business plans and strategies.",
-      prompt: "Create a business plan for ",
-      link: "/dashboard/business-planner",
+      icon: "🎥",
+      title: "Scene Generator",
+      desc: "Turn scripts into cinematic scenes, camera angles, and visual plans.",
+    },
+    {
+      icon: "🎤",
+      title: "Voiceover Studio",
+      desc: "Create narration text and play voiceovers with browser voice support.",
+    },
+    {
+      icon: "📦",
+      title: "Export Workflow",
+      desc: "Copy, clear, export, and reuse your AI-generated creator assets.",
+    },
+    {
+      icon: "🚀",
+      title: "Creator Workspace",
+      desc: "One dashboard for scripts, scenes, thumbnails, and production ideas.",
     },
   ];
 
-  useEffect(() => {
-    const savedMessages = localStorage.getItem("amar-ai-chat-history");
-    if (savedMessages) {
-      setMessages(JSON.parse(savedMessages));
-    }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem("amar-ai-chat-history", JSON.stringify(messages));
-  }, [messages]);
-
-  const typeAIResponse = (text: string) => {
-    let index = 0;
-
-    setMessages((prev) => [...prev, { role: "ai", content: "" }]);
-
-    const interval = setInterval(() => {
-      index++;
-
-      setMessages((prev) => {
-        const updated = [...prev];
-        updated[updated.length - 1] = {
-          role: "ai",
-          content: text.slice(0, index),
-        };
-        return updated;
-      });
-
-      if (index >= text.length) clearInterval(interval);
-    }, 18);
-  };
-
-  const generateAI = async () => {
-    if (!prompt.trim()) return;
-
-    const finalPrompt = `[${activeTool}] ${prompt}`;
-
-    setMessages((prev) => [...prev, { role: "user", content: prompt }]);
-
-    setLoading(true);
-
-    try {
-      const res = await fetch("/api/ai", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ prompt: finalPrompt }),
-      });
-
-      const data = await res.json();
-
-      setPrompt("");
-      setLoading(false);
-
-      typeAIResponse(data.result || data.error || "No response generated.");
-    } catch {
-      setLoading(false);
-      typeAIResponse("Something went wrong.");
-    }
-  };
-
-  const clearChat = () => {
-    setMessages([]);
-    setPrompt("");
-    localStorage.removeItem("amar-ai-chat-history");
-  };
-
-  const copyLastAnswer = async () => {
-    const lastAI = [...messages].reverse().find((m) => m.role === "ai");
-
-    if (lastAI) {
-      await navigator.clipboard.writeText(lastAI.content);
-      alert("Copied latest AI answer!");
-    }
-  };
+  const workflow = [
+    "Idea",
+    "Script",
+    "Scenes",
+    "Thumbnail",
+    "Voiceover",
+    "Export",
+  ];
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-black text-white flex">
+    <main className="min-h-screen bg-black text-white overflow-hidden">
       {/* BACKGROUND */}
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-40 left-1/4 h-96 w-96 rounded-full bg-cyan-500/20 blur-3xl animate-pulse" />
-        <div className="absolute top-40 -right-32 h-96 w-96 rounded-full bg-blue-600/20 blur-3xl animate-pulse" />
-        <div className="absolute bottom-0 left-10 h-80 w-80 rounded-full bg-purple-600/20 blur-3xl animate-pulse" />
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute -top-40 left-1/4 h-96 w-96 rounded-full bg-cyan-500/20 blur-3xl" />
+        <div className="absolute top-40 -right-32 h-96 w-96 rounded-full bg-purple-600/20 blur-3xl" />
+        <div className="absolute bottom-0 left-10 h-80 w-80 rounded-full bg-blue-600/20 blur-3xl" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-[size:70px_70px] opacity-20" />
       </div>
 
-      {/* SIDEBAR */}
-      <aside className="relative z-10 w-64 border-r border-white/10 p-6 hidden lg:block bg-white/5 backdrop-blur-2xl">
-        <h1 className="text-3xl font-bold text-cyan-400">Amar AI</h1>
+      {/* NAVBAR */}
+      <header className="relative z-10 flex items-center justify-between px-6 lg:px-14 py-6 border-b border-white/10 backdrop-blur-xl">
+        <a href="/" className="text-2xl font-bold text-cyan-400">
+          Amar AI Studio
+        </a>
 
-        <nav className="mt-10 space-y-4 text-sm">
-          <div className="p-3 rounded-xl bg-cyan-500 text-black font-semibold">
-            AI Tools
-          </div>
-
-          <a
-            href="/dashboard"
-            className="block p-3 rounded-xl bg-white/5 hover:bg-white/10"
-          >
-            Dashboard
+        <nav className="hidden md:flex items-center gap-8 text-sm text-gray-300">
+          <a href="#features" className="hover:text-cyan-400">
+            Features
           </a>
-
-          <div className="p-3 rounded-xl bg-white/5 hover:bg-white/10">
-            Projects
-          </div>
-
-          <div className="p-3 rounded-xl bg-white/5 hover:bg-white/10">
-            Settings
-          </div>
+          <a href="#workflow" className="hover:text-cyan-400">
+            Workflow
+          </a>
+          <a href="#pricing" className="hover:text-cyan-400">
+            Pricing
+          </a>
         </nav>
 
-        <div className="mt-10 p-4 rounded-2xl bg-black/40 border border-white/10">
-          <p className="text-sm text-gray-400">Active Tool</p>
-
-          <p className="mt-2 text-cyan-400 font-semibold">
-            {activeTool}
-          </p>
-        </div>
-
-        <div className="mt-4 p-4 rounded-2xl bg-black/40 border border-white/10">
-          <p className="text-sm text-gray-400">Status</p>
-
-          <p className="mt-2 text-green-400 font-semibold">
-            Gemini Connected
-          </p>
-        </div>
-      </aside>
-
-      {/* MAIN */}
-      <section className="relative z-10 flex-1 p-6 lg:p-10">
-        <div className="flex flex-col lg:flex-row justify-between gap-6 mb-8">
-          <div>
-            <div className="inline-block mb-4 px-4 py-2 rounded-full border border-cyan-400/30 bg-cyan-400/10 text-cyan-300 text-sm">
-              🚀 Multi-Tool AI Platform
-            </div>
-
-            <h1 className="text-4xl lg:text-5xl font-bold">
-              Amar AI Tools Workspace ⚡
-            </h1>
-
-            <p className="text-gray-400 mt-2">
-              Choose an AI tool and open its dedicated workspace.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3">
-          <UserButton />
-
-            <button
-              onClick={copyLastAnswer}
-              className="px-4 py-2 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10"
-            >
-              Copy Answer
-            </button>
-
-            <button
-              onClick={clearChat}
-              className="px-4 py-2 rounded-xl bg-red-500/20 text-red-300 border border-red-400/20 hover:bg-red-500/30"
-            >
-              Clear
-            </button>
-          </div>
-        </div>
-
-        {/* TOOL CARDS */}
-        <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-5 mb-8">
-          {tools.map((tool) => (
-            <a
-              key={tool.title}
-              href={tool.link}
-              onClick={() => setActiveTool(tool.title)}
-              className={`text-left p-5 rounded-3xl border backdrop-blur-2xl transition hover:scale-[1.02] ${
-                activeTool === tool.title
-                  ? "bg-cyan-500/20 border-cyan-400"
-                  : "bg-white/5 border-white/10 hover:border-cyan-400/50"
-              }`}
-            >
-              <div className="text-4xl">{tool.icon}</div>
-
-              <h3 className="text-xl font-bold mt-4">
-                {tool.title}
-              </h3>
-
-              <p className="text-gray-400 text-sm mt-2">
-                {tool.description}
-              </p>
-            </a>
-          ))}
-        </div>
-
-        {/* CHAT */}
-        <div className="grid lg:grid-cols-4 gap-6">
-          <div className="lg:col-span-3 rounded-3xl border border-white/10 bg-white/5 backdrop-blur-2xl p-5 min-h-[650px] flex flex-col shadow-2xl">
-            <div className="flex-1 overflow-y-auto space-y-5 pr-2">
-              {messages.length === 0 && (
-                <div className="h-full flex items-center justify-center text-center text-gray-400">
-                  <div>
-                    <div className="mx-auto mb-6 h-16 w-16 rounded-2xl bg-cyan-500/20 border border-cyan-400/30 flex items-center justify-center text-3xl">
-                      🤖
-                    </div>
-
-                    <h2 className="text-2xl font-bold text-white">
-                      Choose an AI tool and start creating
-                    </h2>
-
-                    <p className="mt-3 max-w-md">
-                      Generate scripts, content, business plans,
-                      startup ideas, and more.
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {messages.map((msg, index) => (
-                <div
-                  key={index}
-                  className={`flex ${
-                    msg.role === "user"
-                      ? "justify-end"
-                      : "justify-start"
-                  }`}
-                >
-                  <div
-                    className={`max-w-[80%] rounded-2xl p-4 whitespace-pre-wrap leading-relaxed ${
-                      msg.role === "user"
-                        ? "bg-cyan-500 text-black"
-                        : "bg-black/50 border border-white/10 text-gray-200"
-                    }`}
-                  >
-                    {msg.content}
-
-                    {msg.role === "ai" &&
-                      index === messages.length - 1 &&
-                      !loading && (
-                        <span className="ml-1 animate-pulse text-cyan-400">
-                          ▍
-                        </span>
-                      )}
-                  </div>
-                </div>
-              ))}
-
-              {loading && (
-                <div className="bg-black/50 border border-white/10 rounded-2xl p-4 w-fit text-gray-400 animate-pulse">
-                  AI is thinking...
-                </div>
-              )}
-            </div>
-
-            <div className="mt-5">
-              <textarea
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                rows={4}
-                placeholder={`Use ${activeTool}...`}
-                className="w-full p-4 rounded-2xl bg-black/60 border border-white/10 outline-none resize-none focus:border-cyan-400 transition"
-              />
-
-              <button
-                onClick={generateAI}
-                disabled={loading}
-                className="mt-3 w-full bg-cyan-500 text-black py-4 rounded-2xl font-bold hover:scale-[1.01] transition disabled:opacity-50"
-              >
-                {loading
-                  ? "Generating..."
-                  : `Generate with ${activeTool}`}
+        <div className="flex items-center gap-3">
+          <SignedOut>
+            <SignInButton mode="modal">
+              <button className="px-5 py-2 rounded-xl bg-cyan-500 text-black font-bold hover:scale-105 transition">
+                Sign In
               </button>
+            </SignInButton>
+          </SignedOut>
+
+          <SignedIn>
+            <a
+              href="/dashboard"
+              className="px-5 py-2 rounded-xl bg-cyan-500 text-black font-bold hover:scale-105 transition"
+            >
+              Dashboard
+            </a>
+            <UserButton />
+          </SignedIn>
+        </div>
+      </header>
+
+      {/* HERO */}
+      <section className="relative z-10 text-center px-6 pt-28 pb-24">
+        <div className="inline-block mb-6 px-5 py-2 rounded-full border border-cyan-400/30 bg-cyan-400/10 text-cyan-300 text-sm">
+          🚀 AI Creator Production Studio
+        </div>
+
+        <h1 className="text-5xl md:text-7xl font-bold max-w-5xl mx-auto leading-tight">
+          Create YouTube Content with AI
+        </h1>
+
+        <p className="text-gray-400 mt-6 max-w-3xl mx-auto text-lg md:text-xl">
+          Generate scripts, cinematic scenes, thumbnail prompts, and voiceovers
+          in one powerful creator workflow.
+        </p>
+
+        <div className="mt-10 flex flex-col sm:flex-row justify-center gap-4">
+          <SignedOut>
+            <SignInButton mode="modal">
+              <button className="px-8 py-4 rounded-2xl bg-cyan-500 text-black font-bold hover:scale-105 transition">
+                Start Creating Free
+              </button>
+            </SignInButton>
+          </SignedOut>
+
+          <SignedIn>
+            <a
+              href="/dashboard"
+              className="px-8 py-4 rounded-2xl bg-cyan-500 text-black font-bold hover:scale-105 transition"
+            >
+              Open Dashboard
+            </a>
+          </SignedIn>
+
+          <a
+            href="#workflow"
+            className="px-8 py-4 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 transition"
+          >
+            See Workflow
+          </a>
+        </div>
+
+        <div className="mt-16 max-w-6xl mx-auto rounded-3xl border border-white/10 bg-white/5 backdrop-blur-2xl p-6 shadow-2xl">
+          <div className="grid md:grid-cols-4 gap-4 text-left">
+            <div className="p-5 rounded-2xl bg-black/50 border border-white/10">
+              <p className="text-gray-400 text-sm">AI Tools</p>
+              <h3 className="text-3xl font-bold text-cyan-400 mt-2">6+</h3>
+            </div>
+
+            <div className="p-5 rounded-2xl bg-black/50 border border-white/10">
+              <p className="text-gray-400 text-sm">Workflow</p>
+              <h3 className="text-3xl font-bold text-cyan-400 mt-2">
+                Script → Video
+              </h3>
+            </div>
+
+            <div className="p-5 rounded-2xl bg-black/50 border border-white/10">
+              <p className="text-gray-400 text-sm">Voice</p>
+              <h3 className="text-3xl font-bold text-cyan-400 mt-2">
+                Browser AI
+              </h3>
+            </div>
+
+            <div className="p-5 rounded-2xl bg-black/50 border border-white/10">
+              <p className="text-gray-400 text-sm">Export</p>
+              <h3 className="text-3xl font-bold text-cyan-400 mt-2">
+                TXT Ready
+              </h3>
             </div>
           </div>
-
-          {/* STATS */}
-          <aside className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-2xl p-5 shadow-2xl">
-            <h2 className="text-xl font-bold">
-              Workspace Stats
-            </h2>
-
-            <div className="mt-5 space-y-4">
-              <div className="p-4 rounded-2xl bg-black/50 border border-white/10">
-                <p className="text-gray-400 text-sm">Messages</p>
-
-                <p className="text-2xl font-bold text-cyan-400">
-                  {messages.length}
-                </p>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-black/50 border border-white/10">
-                <p className="text-gray-400 text-sm">AI Tools</p>
-
-                <p className="text-2xl font-bold text-cyan-400">
-                  {tools.length}
-                </p>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-black/50 border border-white/10">
-                <p className="text-gray-400 text-sm">Model</p>
-
-                <p className="text-lg font-bold text-green-400">
-                  Gemini
-                </p>
-              </div>
-            </div>
-          </aside>
         </div>
       </section>
+
+      {/* FEATURES */}
+      <section id="features" className="relative z-10 px-6 lg:px-14 py-20">
+        <div className="text-center mb-14">
+          <h2 className="text-4xl md:text-5xl font-bold">
+            Everything Creators Need
+          </h2>
+          <p className="text-gray-400 mt-4">
+            Not just AI answers — a full creator workflow.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6 max-w-7xl mx-auto">
+          {features.map((feature) => (
+            <div
+              key={feature.title}
+              className="p-7 rounded-3xl border border-white/10 bg-white/5 backdrop-blur-2xl hover:border-cyan-400/50 transition"
+            >
+              <div className="text-5xl">{feature.icon}</div>
+              <h3 className="text-2xl font-bold mt-5">{feature.title}</h3>
+              <p className="text-gray-400 mt-3">{feature.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* WORKFLOW */}
+      <section id="workflow" className="relative z-10 px-6 lg:px-14 py-20">
+        <div className="max-w-6xl mx-auto rounded-3xl border border-white/10 bg-white/5 backdrop-blur-2xl p-8 lg:p-12">
+          <h2 className="text-4xl md:text-5xl font-bold text-center">
+            From Idea to Creator Assets
+          </h2>
+
+          <p className="text-gray-400 text-center mt-4 max-w-2xl mx-auto">
+            Your users do not need ten different tools. They can build a
+            complete content workflow in one place.
+          </p>
+
+          <div className="grid md:grid-cols-6 gap-4 mt-12">
+            {workflow.map((step, index) => (
+              <div
+                key={step}
+                className="p-5 rounded-2xl bg-black/50 border border-white/10 text-center"
+              >
+                <div className="mx-auto mb-3 h-10 w-10 rounded-full bg-cyan-500 text-black flex items-center justify-center font-bold">
+                  {index + 1}
+                </div>
+                <p className="font-semibold">{step}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* PRICING */}
+      <section id="pricing" className="relative z-10 px-6 lg:px-14 py-20">
+        <div className="text-center mb-14">
+          <h2 className="text-4xl md:text-5xl font-bold">
+            Simple Pricing
+          </h2>
+          <p className="text-gray-400 mt-4">
+            Start free, upgrade later when premium AI APIs are connected.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          <div className="p-8 rounded-3xl border border-white/10 bg-white/5">
+            <h3 className="text-2xl font-bold">Free</h3>
+            <p className="text-gray-400 mt-2">For testing and creators.</p>
+            <p className="text-4xl font-bold mt-6">$0</p>
+            <ul className="mt-6 space-y-3 text-gray-300">
+              <li>✅ Script generation</li>
+              <li>✅ Thumbnail prompts</li>
+              <li>✅ Scene ideas</li>
+              <li>✅ Browser voice</li>
+            </ul>
+          </div>
+
+          <div className="p-8 rounded-3xl border border-cyan-400 bg-cyan-500/10 scale-105">
+            <h3 className="text-2xl font-bold">Creator Pro</h3>
+            <p className="text-gray-400 mt-2">For serious YouTubers.</p>
+            <p className="text-4xl font-bold mt-6">$9</p>
+            <ul className="mt-6 space-y-3 text-gray-300">
+              <li>✅ Real AI voices</li>
+              <li>✅ MP3 downloads</li>
+              <li>✅ Real thumbnails</li>
+              <li>✅ Saved projects</li>
+            </ul>
+          </div>
+
+          <div className="p-8 rounded-3xl border border-white/10 bg-white/5">
+            <h3 className="text-2xl font-bold">Studio</h3>
+            <p className="text-gray-400 mt-2">For agencies and teams.</p>
+            <p className="text-4xl font-bold mt-6">$29</p>
+            <ul className="mt-6 space-y-3 text-gray-300">
+              <li>✅ Team projects</li>
+              <li>✅ Video workflow</li>
+              <li>✅ Character upload</li>
+              <li>✅ Priority generation</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="relative z-10 px-6 py-24 text-center">
+        <h2 className="text-4xl md:text-6xl font-bold max-w-4xl mx-auto">
+          Build Content Faster with Amar AI Studio
+        </h2>
+
+        <p className="text-gray-400 mt-5">
+          Start with one idea. Generate the full creator workflow.
+        </p>
+
+        <div className="mt-8">
+          <SignedOut>
+            <SignInButton mode="modal">
+              <button className="px-8 py-4 rounded-2xl bg-cyan-500 text-black font-bold hover:scale-105 transition">
+                Start Creating Now
+              </button>
+            </SignInButton>
+          </SignedOut>
+
+          <SignedIn>
+            <a
+              href="/dashboard"
+              className="px-8 py-4 rounded-2xl bg-cyan-500 text-black font-bold hover:scale-105 transition"
+            >
+              Go to Dashboard
+            </a>
+          </SignedIn>
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="relative z-10 border-t border-white/10 px-6 lg:px-14 py-10 text-center text-gray-500">
+        © 2026 Amar AI Studio. Built for creators, students, and storytellers.
+      </footer>
     </main>
   );
 }

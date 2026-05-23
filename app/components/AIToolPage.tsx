@@ -135,23 +135,111 @@ Make it natural, cinematic, emotional, and ready to speak.
 
     setVoiceTextLoading(false);
   };
-
   const playBrowserVoice = () => {
     const textToSpeak = voiceoverScript || result;
-
+  
     if (!textToSpeak) return;
-
+  
+    // Stop old voice first
     window.speechSynthesis.cancel();
-
+  
     const utterance = new SpeechSynthesisUtterance(textToSpeak);
+  
+    // Get installed browser voices
+    const voices = window.speechSynthesis.getVoices();
+  
+    let selectedVoice: SpeechSynthesisVoice | null = null;
+  
+    // LANGUAGE SELECTION
+    if (language === "ur-PK") {
+      selectedVoice =
+        voices.find((v) => v.lang.toLowerCase().includes("ur")) ||
+        voices.find((v) => v.lang.toLowerCase().includes("hi")) ||
+        null;
+    }
+  
+    if (language === "en-US") {
+      selectedVoice =
+        voices.find((v) => v.name.includes("David")) ||
+        voices.find((v) => v.lang.toLowerCase().includes("en")) ||
+        null;
+    }
+  
+    if (language === "hi-IN") {
+      selectedVoice =
+        voices.find((v) => v.lang.toLowerCase().includes("hi")) ||
+        null;
+    }
+  
+    if (language === "ar-SA") {
+      selectedVoice =
+        voices.find((v) => v.lang.toLowerCase().includes("ar")) ||
+        null;
+    }
+  
+    // Apply selected voice
+    if (selectedVoice) {
+      utterance.voice = selectedVoice;
+    }
+  
     utterance.lang = language;
-    utterance.rate = voiceStyle === "Energetic YouTuber" ? 1.08 : 0.92;
-    utterance.pitch = voiceStyle === "Emotional Female" ? 1.15 : 0.9;
+  
+    // DEFAULT SETTINGS
+    utterance.rate = 1;
+    utterance.pitch = 1;
     utterance.volume = 1;
-
-    utterance.onstart = () => setSpeaking(true);
-    utterance.onend = () => setSpeaking(false);
-
+  
+    // VOICE STYLE SETTINGS
+    if (voiceStyle === "Energetic YouTuber") {
+      utterance.rate = 1.15;
+      utterance.pitch = 1.2;
+    }
+  
+    if (voiceStyle === "Documentary Narrator") {
+      utterance.rate = 0.9;
+      utterance.pitch = 0.9;
+    }
+  
+    if (voiceStyle === "Emotional Female") {
+      utterance.rate = 0.95;
+      utterance.pitch = 1.3;
+    }
+  
+    if (voiceStyle === "Cinematic Male") {
+      utterance.rate = 0.88;
+      utterance.pitch = 0.75;
+    }
+  
+    // EMOTION SETTINGS
+    if (emotion === "Dramatic") {
+      utterance.rate -= 0.05;
+    }
+  
+    if (emotion === "Inspirational") {
+      utterance.rate += 0.05;
+      utterance.pitch += 0.05;
+    }
+  
+    if (emotion === "Dark") {
+      utterance.rate -= 0.08;
+      utterance.pitch -= 0.1;
+    }
+  
+    if (emotion === "Motivational") {
+      utterance.rate += 0.08;
+      utterance.volume = 1;
+    }
+  
+    // UI states
+    utterance.onstart = () => {
+      setSpeaking(true);
+    };
+  
+    utterance.onend = () => {
+      setSpeaking(false);
+    };
+  
+    // Play voice
     window.speechSynthesis.speak(utterance);
   };
 
