@@ -4,6 +4,8 @@ export async function POST(req: Request) {
   
       const apiKey = process.env.ELEVENLABS_API_KEY;
   
+      console.log("ELEVENLABS KEY EXISTS:", !!apiKey);
+  
       if (!apiKey) {
         return Response.json(
           { error: "Missing ELEVENLABS_API_KEY" },
@@ -24,12 +26,18 @@ export async function POST(req: Request) {
           body: JSON.stringify({
             text,
             model_id: "eleven_multilingual_v2",
+            voice_settings: {
+              stability: 0.5,
+              similarity_boost: 0.75,
+            },
           }),
         }
       );
   
       if (!response.ok) {
         const errorText = await response.text();
+  
+        console.log("ELEVENLABS ERROR:", errorText);
   
         return Response.json(
           { error: errorText },
@@ -45,6 +53,8 @@ export async function POST(req: Request) {
         },
       });
     } catch (error: any) {
+      console.log("VOICE ROUTE ERROR:", error);
+  
       return Response.json(
         { error: error.message },
         { status: 500 }
