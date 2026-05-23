@@ -7,40 +7,61 @@ export default function ThumbnailGeneratorPage() {
   const [topic, setTopic] = useState("");
   const [thumbnailPrompt, setThumbnailPrompt] = useState("");
 
-  const generateThumbnail = () => {
-    if (!topic.trim()) {
-      alert("Please enter a thumbnail topic.");
-      return;
-    }
+  const generatePrompt = () => {
+    if (!topic) return;
 
-    const prompt = `Create a high-quality cinematic YouTube thumbnail about "${topic}".
+    const prompt = `
+Create a high-quality cinematic YouTube thumbnail about "${topic}".
 
 Style:
 - Ultra realistic
 - 3D cinematic lighting
 - High contrast
 - Viral YouTube style
-- Emotional facial expressions
-- Dramatic background
-- Orange and blue cinematic color grading
-- Hyper detailed
+- Bright glowing text
+- Emotional facial expression
+- Dramatic atmosphere
+- Sharp focus
 - 4K quality
+- Modern documentary thumbnail
 
 Composition:
-- Main subject large in center
-- Eye-catching expression
-- Glowing bold text
-- Professional movie poster feel
+- Main subject centered
+- Dynamic camera angle
+- Powerful cinematic background
+- Bold colors
+- Viral click-through style
 
 Aspect Ratio:
-16:9 YouTube thumbnail`;
+16:9 YouTube thumbnail
+`;
 
     setThumbnailPrompt(prompt);
   };
 
-  const copyPrompt = async () => {
-    await navigator.clipboard.writeText(thumbnailPrompt);
-    alert("Thumbnail prompt copied!");
+  const saveProject = () => {
+    if (!thumbnailPrompt) return;
+
+    const existingProjects = JSON.parse(
+      localStorage.getItem("amar-ai-projects") || "[]"
+    );
+
+    const newProject = {
+      id: Date.now().toString(),
+      title: topic || "Thumbnail Prompt",
+      type: "Thumbnail Prompt",
+      content: thumbnailPrompt,
+      createdAt: new Date().toLocaleString(),
+    };
+
+    const updatedProjects = [newProject, ...existingProjects];
+
+    localStorage.setItem(
+      "amar-ai-projects",
+      JSON.stringify(updatedProjects)
+    );
+
+    alert("Thumbnail Project Saved!");
   };
 
   return (
@@ -53,50 +74,69 @@ Aspect Ratio:
         <UserButton />
       </div>
 
-      <div className="max-w-5xl mx-auto">
-        <h1 className="text-6xl font-bold mb-4">
-          Thumbnail Generator 🎨
-        </h1>
+      <section className="max-w-6xl mx-auto">
+        <div className="mb-10">
+          <div className="inline-block mb-4 px-4 py-2 rounded-full border border-cyan-400/30 bg-cyan-400/10 text-cyan-300 text-sm">
+            🎨 AI Thumbnail Creator
+          </div>
 
-        <p className="text-gray-400 text-lg mb-10">
-          Generate viral cinematic AI thumbnail prompts instantly.
-        </p>
+          <h1 className="text-6xl font-bold">
+            Thumbnail Generator 🎨
+          </h1>
 
-        <div className="border border-white/10 rounded-3xl p-8 bg-white/5">
+          <p className="text-gray-400 mt-4 text-lg">
+            Generate viral cinematic AI thumbnail prompts instantly.
+          </p>
+        </div>
+
+        <div className="p-8 rounded-3xl border border-white/10 bg-white/5">
           <textarea
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
-            placeholder="Enter thumbnail topic..."
-            className="w-full h-40 bg-black border border-white/10 rounded-2xl p-6 text-xl outline-none"
+            placeholder="Write your thumbnail topic..."
+            className="w-full h-40 bg-black border border-white/10 rounded-2xl p-6 text-white outline-none text-2xl"
           />
 
           <button
-            onClick={generateThumbnail}
-            className="w-full mt-6 bg-cyan-500 text-black py-5 rounded-2xl text-xl font-bold"
+            onClick={generatePrompt}
+            className="w-full mt-6 bg-cyan-500 hover:bg-cyan-400 transition text-black font-bold py-5 rounded-2xl text-2xl"
           >
             Generate Thumbnail Prompt
           </button>
         </div>
 
         {thumbnailPrompt && (
-          <div className="border border-white/10 rounded-3xl p-8 bg-white/5 mt-10">
-            <h2 className="text-3xl font-bold mb-6">
-              Thumbnail Prompt
-            </h2>
+          <div className="mt-10 p-8 rounded-3xl border border-white/10 bg-white/5">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+              <h2 className="text-4xl font-bold">
+                Thumbnail Prompt
+              </h2>
 
-            <div className="whitespace-pre-wrap text-gray-200 leading-8">
-              {thumbnailPrompt}
+              <div className="flex gap-3">
+                <button
+                  onClick={() =>
+                    navigator.clipboard.writeText(thumbnailPrompt)
+                  }
+                  className="px-5 py-3 rounded-xl border border-white/10"
+                >
+                  Copy Prompt
+                </button>
+
+                <button
+                  onClick={saveProject}
+                  className="px-5 py-3 rounded-xl bg-cyan-500 text-black font-bold"
+                >
+                  Save Project
+                </button>
+              </div>
             </div>
 
-            <button
-              onClick={copyPrompt}
-              className="w-full mt-8 bg-green-500 text-black py-5 rounded-2xl text-xl font-bold"
-            >
-              Copy Prompt
-            </button>
+            <div className="p-6 rounded-2xl bg-black border border-white/10 whitespace-pre-wrap leading-8 text-gray-200">
+              {thumbnailPrompt}
+            </div>
           </div>
         )}
-      </div>
+      </section>
     </main>
   );
 }
