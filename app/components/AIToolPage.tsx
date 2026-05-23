@@ -15,41 +15,31 @@ export default function AIToolPage({
   starterPrompt: string;
 }) {
   const [prompt, setPrompt] = useState(starterPrompt);
-
   const [result, setResult] = useState("");
-
   const [thumbnailPrompt, setThumbnailPrompt] = useState("");
-
   const [sceneIdeas, setSceneIdeas] = useState("");
-
   const [voiceoverScript, setVoiceoverScript] = useState("");
 
   const [language, setLanguage] = useState("English");
-
-  const [voiceStyle, setVoiceStyle] = useState(
-    "Documentary Narrator"
-  );
-
+  const [voiceStyle, setVoiceStyle] = useState("Documentary Narrator");
   const [emotion, setEmotion] = useState("Dramatic");
 
+  const [audioUrl, setAudioUrl] = useState("");
   const [loading, setLoading] = useState(false);
-
-  const [thumbnailLoading, setThumbnailLoading] =
-    useState(false);
-
+  const [thumbnailLoading, setThumbnailLoading] = useState(false);
   const [sceneLoading, setSceneLoading] = useState(false);
-
-  const [voiceLoading, setVoiceLoading] = useState(false);
+  const [voiceTextLoading, setVoiceTextLoading] = useState(false);
+  const [realVoiceLoading, setRealVoiceLoading] = useState(false);
 
   const generateAI = async () => {
     if (!prompt.trim()) return;
 
     setLoading(true);
-
     setResult("");
     setThumbnailPrompt("");
     setSceneIdeas("");
     setVoiceoverScript("");
+    setAudioUrl("");
 
     try {
       const res = await fetch("/api/ai", {
@@ -57,16 +47,11 @@ export default function AIToolPage({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          prompt,
-        }),
+        body: JSON.stringify({ prompt }),
       });
 
       const data = await res.json();
-
-      setResult(
-        data.result || data.error || "No response generated."
-      );
+      setResult(data.result || data.error || "No response generated.");
     } catch {
       setResult("Something went wrong.");
     }
@@ -91,21 +76,13 @@ Create a cinematic YouTube thumbnail prompt based on this content:
 
 ${result}
 
-The thumbnail should be:
-- emotional
-- cinematic
-- viral YouTube style
-- dramatic lighting
-- ultra detailed
+The thumbnail should be emotional, cinematic, viral YouTube style, dramatic lighting, ultra detailed.
 `,
         }),
       });
 
       const data = await res.json();
-
-      setThumbnailPrompt(
-        data.result || data.error || "No thumbnail generated."
-      );
+      setThumbnailPrompt(data.result || data.error || "No thumbnail generated.");
     } catch {
       setThumbnailPrompt("Something went wrong.");
     }
@@ -140,17 +117,12 @@ For every scene include:
 - environment
 - mood
 - visual style
-
-Make it cinematic and professional.
 `,
         }),
       });
 
       const data = await res.json();
-
-      setSceneIdeas(
-        data.result || data.error || "No scenes generated."
-      );
+      setSceneIdeas(data.result || data.error || "No scenes generated.");
     } catch {
       setSceneIdeas("Something went wrong.");
     }
@@ -158,10 +130,11 @@ Make it cinematic and professional.
     setSceneLoading(false);
   };
 
-  const generateVoiceover = async () => {
+  const generateVoiceoverScript = async () => {
     if (!result) return;
 
-    setVoiceLoading(true);
+    setVoiceTextLoading(true);
+    setAudioUrl("");
 
     try {
       const res = await fetch("/api/ai", {
@@ -188,22 +161,52 @@ Add pauses, emotional delivery, and cinematic narration style.
       });
 
       const data = await res.json();
-
-      setVoiceoverScript(
-        data.result ||
-          data.error ||
-          "No voiceover generated."
-      );
+      setVoiceoverScript(data.result || data.error || "No voiceover generated.");
     } catch {
       setVoiceoverScript("Something went wrong.");
     }
 
-    setVoiceLoading(false);
+    setVoiceTextLoading(false);
+  };
+
+  const generateRealVoice = async () => {
+    const textToSpeak = voiceoverScript || result;
+
+    if (!textToSpeak) return;
+
+    setRealVoiceLoading(true);
+    setAudioUrl("");
+
+    try {
+      const res = await fetch("/api/voice", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          text: textToSpeak.slice(0, 2500),
+        }),
+      });
+
+      if (!res.ok) {
+        setVoiceoverScript("Voice generation failed. Check ElevenLabs API key or credits.");
+        setRealVoiceLoading(false);
+        return;
+      }
+
+      const audioBlob = await res.blob();
+      const url = URL.createObjectURL(audioBlob);
+
+      setAudioUrl(url);
+    } catch {
+      setVoiceoverScript("Voice generation failed.");
+    }
+
+    setRealVoiceLoading(false);
   };
 
   const copyAnswer = async () => {
     await navigator.clipboard.writeText(result);
-
     alert("Answer copied!");
   };
 
@@ -212,6 +215,7 @@ Add pauses, emotional delivery, and cinematic narration style.
     setThumbnailPrompt("");
     setSceneIdeas("");
     setVoiceoverScript("");
+    setAudioUrl("");
   };
 
   const exportAnswer = () => {
@@ -220,16 +224,22 @@ Add pauses, emotional delivery, and cinematic narration style.
     });
 
     const url = URL.createObjectURL(file);
-
     const link = document.createElement("a");
 
     link.href = url;
-
     link.download = `${title}.txt`;
-
     link.click();
 
     URL.revokeObjectURL(url);
+  };
+
+  const downloadAudio = () => {
+    if (!audioUrl) return;
+
+    const link = document.createElement("a");
+    link.href = audioUrl;
+    link.download = `${title}-voiceover.mp3`;
+    link.click();
   };
 
   return (
@@ -246,13 +256,9 @@ Add pauses, emotional delivery, and cinematic narration style.
         <div className="rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-2xl">
           <div className="text-6xl">{icon}</div>
 
-          <h1 className="text-5xl font-bold mt-6">
-            {title}
-          </h1>
+          <h1 className="text-5xl font-bold mt-6">{title}</h1>
 
-          <p className="text-gray-400 mt-4 text-lg">
-            {description}
-          </p>
+          <p className="text-gray-400 mt-4 text-lg">{description}</p>
 
           <textarea
             value={prompt}
@@ -298,7 +304,7 @@ Add pauses, emotional delivery, and cinematic narration style.
                   disabled={thumbnailLoading}
                   className="border border-yellow-400 text-yellow-300 py-3 rounded-2xl"
                 >
-                  Thumbnail
+                  {thumbnailLoading ? "Generating..." : "Thumbnail"}
                 </button>
 
                 <button
@@ -306,7 +312,7 @@ Add pauses, emotional delivery, and cinematic narration style.
                   disabled={sceneLoading}
                   className="border border-purple-400 text-purple-300 py-3 rounded-2xl"
                 >
-                  Scenes
+                  {sceneLoading ? "Generating..." : "Scenes"}
                 </button>
               </div>
 
@@ -340,20 +346,15 @@ Add pauses, emotional delivery, and cinematic narration style.
 
               <div className="mt-8 p-6 rounded-2xl border border-cyan-400/20 bg-cyan-500/5">
                 <h2 className="text-2xl font-bold text-cyan-300 mb-6">
-                  🎤 Voiceover Studio
+                  🎤 Real Voiceover Studio
                 </h2>
 
                 <div className="grid md:grid-cols-3 gap-4">
                   <div>
-                    <label className="text-sm text-gray-400">
-                      Language
-                    </label>
-
+                    <label className="text-sm text-gray-400">Language</label>
                     <select
                       value={language}
-                      onChange={(e) =>
-                        setLanguage(e.target.value)
-                      }
+                      onChange={(e) => setLanguage(e.target.value)}
                       className="w-full mt-2 p-3 rounded-xl bg-black border border-white/10"
                     >
                       <option>English</option>
@@ -367,12 +368,9 @@ Add pauses, emotional delivery, and cinematic narration style.
                     <label className="text-sm text-gray-400">
                       Voice Style
                     </label>
-
                     <select
                       value={voiceStyle}
-                      onChange={(e) =>
-                        setVoiceStyle(e.target.value)
-                      }
+                      onChange={(e) => setVoiceStyle(e.target.value)}
                       className="w-full mt-2 p-3 rounded-xl bg-black border border-white/10"
                     >
                       <option>Documentary Narrator</option>
@@ -383,15 +381,10 @@ Add pauses, emotional delivery, and cinematic narration style.
                   </div>
 
                   <div>
-                    <label className="text-sm text-gray-400">
-                      Emotion
-                    </label>
-
+                    <label className="text-sm text-gray-400">Emotion</label>
                     <select
                       value={emotion}
-                      onChange={(e) =>
-                        setEmotion(e.target.value)
-                      }
+                      onChange={(e) => setEmotion(e.target.value)}
                       className="w-full mt-2 p-3 rounded-xl bg-black border border-white/10"
                     >
                       <option>Dramatic</option>
@@ -402,21 +395,46 @@ Add pauses, emotional delivery, and cinematic narration style.
                   </div>
                 </div>
 
-                <button
-                  onClick={generateVoiceover}
-                  disabled={voiceLoading}
-                  className="mt-6 w-full bg-cyan-500 text-black py-4 rounded-2xl font-bold"
-                >
-                  {voiceLoading
-                    ? "Generating Voiceover..."
-                    : "Generate Voiceover"}
-                </button>
+                <div className="grid md:grid-cols-2 gap-3 mt-6">
+                  <button
+                    onClick={generateVoiceoverScript}
+                    disabled={voiceTextLoading}
+                    className="w-full bg-cyan-500 text-black py-4 rounded-2xl font-bold"
+                  >
+                    {voiceTextLoading
+                      ? "Writing Narration..."
+                      : "Generate Voiceover Text"}
+                  </button>
+
+                  <button
+                    onClick={generateRealVoice}
+                    disabled={realVoiceLoading}
+                    className="w-full bg-green-500 text-black py-4 rounded-2xl font-bold"
+                  >
+                    {realVoiceLoading
+                      ? "Generating MP3..."
+                      : "Generate Real Voice"}
+                  </button>
+                </div>
+
+                {audioUrl && (
+                  <div className="mt-6 p-5 rounded-2xl bg-black border border-white/10">
+                    <audio controls className="w-full" src={audioUrl} />
+
+                    <button
+                      onClick={downloadAudio}
+                      className="mt-4 w-full border border-green-400 text-green-300 py-3 rounded-2xl hover:bg-green-400 hover:text-black transition"
+                    >
+                      Download MP3
+                    </button>
+                  </div>
+                )}
               </div>
 
               {voiceoverScript && (
                 <div className="mt-8 p-6 rounded-2xl border border-cyan-400/20 bg-cyan-500/5">
                   <h2 className="text-2xl font-bold text-cyan-300 mb-4">
-                    🎙 AI Voiceover Narration
+                    🎙 Voiceover Text
                   </h2>
 
                   <div className="whitespace-pre-wrap text-gray-200">
