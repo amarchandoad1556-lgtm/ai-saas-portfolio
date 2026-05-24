@@ -11,11 +11,25 @@ export default function DashboardPage() {
       color: "from-cyan-500/20 to-blue-500/10",
     },
     {
-      title: "Thumbnail Generator",
+      title: "Thumbnail Prompt Generator",
       icon: "🎨",
       href: "/dashboard/thumbnail-generator",
       desc: "Create viral cinematic thumbnail prompts instantly.",
       color: "from-purple-500/20 to-pink-500/10",
+    },
+    {
+      title: "Thumbnail Image Generator",
+      icon: "🖼️",
+      href: "/dashboard/thumbnail-image-generator",
+      desc: "Generate AI-ready thumbnail image previews and prompts.",
+      color: "from-yellow-500/20 to-orange-500/10",
+    },
+    {
+      title: "AI Video Generator",
+      icon: "🎥",
+      href: "/dashboard/video-generator",
+      desc: "Create full video plans, storyboards, voiceovers, and scene prompts.",
+      color: "from-red-500/20 to-orange-500/10",
     },
     {
       title: "Script-to-Assets Studio",
@@ -50,11 +64,11 @@ export default function DashboardPage() {
         </h2>
 
         <p className="text-gray-400 mt-6 text-lg max-w-3xl">
-          Generate scripts, thumbnails, voiceovers, scene plans, and creator
-          projects inside one cinematic AI workspace.
+          Generate scripts, thumbnails, voiceovers, scene plans, video plans,
+          images, and creator projects inside one cinematic AI workspace.
         </p>
 
-        <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-6 mt-12">
+        <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6 mt-12">
           {tools.map((tool) => (
             <Link
               key={tool.title}
