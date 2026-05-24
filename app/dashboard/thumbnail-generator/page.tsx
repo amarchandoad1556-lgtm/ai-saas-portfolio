@@ -1,14 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { UserButton } from "@clerk/nextjs";
+import toast from "react-hot-toast";
+import AppLayout from "../../components/AppLayout";
 
 export default function ThumbnailGeneratorPage() {
   const [topic, setTopic] = useState("");
   const [thumbnailPrompt, setThumbnailPrompt] = useState("");
 
   const generatePrompt = () => {
-    if (!topic) return;
+    if (!topic.trim()) {
+      toast.error("Please enter a topic.");
+      return;
+    }
 
     const prompt = `
 Create a high-quality cinematic YouTube thumbnail about "${topic}".
@@ -37,10 +41,15 @@ Aspect Ratio:
 `;
 
     setThumbnailPrompt(prompt);
+
+    toast.success("Thumbnail prompt generated!");
   };
 
   const saveProject = () => {
-    if (!thumbnailPrompt) return;
+    if (!thumbnailPrompt) {
+      toast.error("Nothing to save.");
+      return;
+    }
 
     const existingProjects = JSON.parse(
       localStorage.getItem("amar-ai-projects") || "[]"
@@ -61,31 +70,23 @@ Aspect Ratio:
       JSON.stringify(updatedProjects)
     );
 
-    alert("Thumbnail Project Saved!");
+    toast.success("Project saved!");
   };
 
   return (
-    <main className="min-h-screen bg-black text-white p-8">
-      <div className="flex justify-between items-center mb-10">
-        <a href="/dashboard" className="text-cyan-400">
-          ← Back to Dashboard
-        </a>
-
-        <UserButton />
-      </div>
-
+    <AppLayout>
       <section className="max-w-6xl mx-auto">
         <div className="mb-10">
           <div className="inline-block mb-4 px-4 py-2 rounded-full border border-cyan-400/30 bg-cyan-400/10 text-cyan-300 text-sm">
-            🎨 AI Thumbnail Creator
+            🎨 Thumbnail Prompt Generator
           </div>
 
-          <h1 className="text-6xl font-bold">
-            Thumbnail Generator 🎨
+          <h1 className="text-5xl md:text-6xl font-bold">
+            Generate Thumbnail Prompts
           </h1>
 
           <p className="text-gray-400 mt-4 text-lg">
-            Generate viral cinematic AI thumbnail prompts instantly.
+            Create cinematic viral thumbnail prompts instantly.
           </p>
         </div>
 
@@ -112,23 +113,12 @@ Aspect Ratio:
                 Thumbnail Prompt
               </h2>
 
-              <div className="flex gap-3">
-                <button
-                  onClick={() =>
-                    navigator.clipboard.writeText(thumbnailPrompt)
-                  }
-                  className="px-5 py-3 rounded-xl border border-white/10"
-                >
-                  Copy Prompt
-                </button>
-
-                <button
-                  onClick={saveProject}
-                  className="px-5 py-3 rounded-xl bg-cyan-500 text-black font-bold"
-                >
-                  Save Project
-                </button>
-              </div>
+              <button
+                onClick={saveProject}
+                className="px-5 py-3 rounded-xl bg-cyan-500 text-black font-bold"
+              >
+                Save Project
+              </button>
             </div>
 
             <div className="p-6 rounded-2xl bg-black border border-white/10 whitespace-pre-wrap leading-8 text-gray-200">
@@ -137,6 +127,6 @@ Aspect Ratio:
           </div>
         )}
       </section>
-    </main>
+    </AppLayout>
   );
 }

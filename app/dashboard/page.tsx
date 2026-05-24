@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { UserButton } from "@clerk/nextjs";
+import AppLayout from "../components/AppLayout";
 
 export default function DashboardPage() {
   const tools = [
@@ -48,16 +48,7 @@ export default function DashboardPage() {
   ];
 
   return (
-    <main className="min-h-screen bg-black text-white p-6 md:p-8">
-      <div className="flex justify-between items-center mb-10">
-        <div>
-          <p className="text-cyan-400 font-semibold">🚀 Creator Workspace</p>
-          <h1 className="text-4xl font-bold mt-2">CreatorForge AI</h1>
-        </div>
-
-        <UserButton />
-      </div>
-
+    <AppLayout>
       <section className="max-w-7xl mx-auto">
         <h2 className="text-4xl md:text-7xl font-bold leading-tight">
           Create YouTube Content Faster with AI
@@ -76,16 +67,13 @@ export default function DashboardPage() {
               className={`rounded-3xl border border-white/10 bg-gradient-to-br ${tool.color} p-8 hover:border-cyan-400/50 transition`}
             >
               <div className="text-6xl mb-6">{tool.icon}</div>
-
               <h3 className="text-3xl font-bold">{tool.title}</h3>
-
               <p className="text-gray-300 mt-4">{tool.desc}</p>
-
               <p className="text-cyan-300 mt-8 font-semibold">Open Tool →</p>
             </Link>
           ))}
         </div>
       </section>
-    </main>
+    </AppLayout>
   );
 }

@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { UserButton } from "@clerk/nextjs";
+import toast from "react-hot-toast";
+import AppLayout from "../components/AppLayout";
 
 type Project = {
   id: string;
@@ -32,6 +33,8 @@ export default function ProjectsPage() {
     if (selectedProject?.id === id) {
       setSelectedProject(null);
     }
+
+    toast.success("Project deleted.");
   };
 
   const exportProject = (project: Project) => {
@@ -47,18 +50,12 @@ export default function ProjectsPage() {
     link.click();
 
     URL.revokeObjectURL(url);
+
+    toast.success("Project exported.");
   };
 
   return (
-    <main className="min-h-screen bg-black text-white p-8">
-      <div className="flex justify-between items-center mb-10">
-        <a href="/dashboard" className="text-cyan-400">
-          ← Back to Dashboard
-        </a>
-
-        <UserButton />
-      </div>
-
+    <AppLayout>
       <section className="max-w-7xl mx-auto">
         <div className="mb-10">
           <div className="inline-block mb-4 px-4 py-2 rounded-full border border-cyan-400/30 bg-cyan-400/10 text-cyan-300 text-sm">
@@ -184,6 +181,6 @@ export default function ProjectsPage() {
           </div>
         )}
       </section>
-    </main>
+    </AppLayout>
   );
 }

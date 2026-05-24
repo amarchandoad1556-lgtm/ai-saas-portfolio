@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { UserButton } from "@clerk/nextjs";
+import toast from "react-hot-toast";
+import AppLayout from "../../components/AppLayout";
 
 export default function ThumbnailImageGeneratorPage() {
   const [topic, setTopic] = useState("");
@@ -12,7 +13,7 @@ export default function ThumbnailImageGeneratorPage() {
 
   const generateImage = async () => {
     if (!topic.trim()) {
-      alert("Please enter a thumbnail topic.");
+      toast.error("Please enter a thumbnail topic.");
       return;
     }
 
@@ -34,17 +35,20 @@ Details:
 
     setPrompt(finalPrompt);
 
-    // Temporary preview until real image API is connected
     setTimeout(() => {
       setImageUrl(
         "https://placehold.co/1280x720/020617/22d3ee?text=CreatorForge+Thumbnail"
       );
       setLoading(false);
+      toast.success("Thumbnail preview generated!");
     }, 1200);
   };
 
   const saveProject = () => {
-    if (!prompt) return;
+    if (!prompt) {
+      toast.error("Nothing to save.");
+      return;
+    }
 
     const existingProjects = JSON.parse(
       localStorage.getItem("amar-ai-projects") || "[]"
@@ -75,39 +79,25 @@ ${imageUrl || "Image API not connected yet."}
       JSON.stringify([newProject, ...existingProjects])
     );
 
-    alert("Thumbnail image project saved!");
-  };
-
-  const downloadImage = () => {
-    if (!imageUrl) return;
-
-    const link = document.createElement("a");
-    link.href = imageUrl;
-    link.download = "creatorforge-thumbnail.png";
-    link.click();
+    toast.success("Project saved!");
   };
 
   const copyPrompt = async () => {
-    if (!prompt) return;
+    if (!prompt) {
+      toast.error("Nothing to copy.");
+      return;
+    }
 
     await navigator.clipboard.writeText(prompt);
-    alert("Prompt copied!");
+    toast.success("Prompt copied!");
   };
 
   return (
-    <main className="min-h-screen bg-black text-white p-6 md:p-8">
-      <div className="flex justify-between items-center mb-10">
-        <a href="/dashboard" className="text-cyan-400">
-          ← Back to Dashboard
-        </a>
-
-        <UserButton />
-      </div>
-
+    <AppLayout>
       <section className="max-w-6xl mx-auto">
         <div className="mb-10">
           <div className="inline-block mb-4 px-4 py-2 rounded-full border border-cyan-400/30 bg-cyan-400/10 text-cyan-300 text-sm">
-            🎨 Thumbnail Image Generator
+            🖼️ Thumbnail Image Generator
           </div>
 
           <h1 className="text-5xl md:text-6xl font-bold">
@@ -115,8 +105,7 @@ ${imageUrl || "Image API not connected yet."}
           </h1>
 
           <p className="text-gray-400 mt-4 text-lg">
-            Create AI-ready thumbnail image prompts and preview layouts. Real
-            image generation API will connect later.
+            Create AI-ready thumbnail image prompts and preview layouts.
           </p>
         </div>
 
@@ -174,14 +163,7 @@ ${imageUrl || "Image API not connected yet."}
             )}
 
             {imageUrl && (
-              <div className="grid md:grid-cols-3 gap-3 mt-6">
-                <button
-                  onClick={downloadImage}
-                  className="py-3 rounded-xl bg-green-500 text-black font-bold"
-                >
-                  Download
-                </button>
-
+              <div className="grid md:grid-cols-2 gap-3 mt-6">
                 <button
                   onClick={saveProject}
                   className="py-3 rounded-xl bg-cyan-500 text-black font-bold"
@@ -210,6 +192,6 @@ ${imageUrl || "Image API not connected yet."}
           </div>
         )}
       </section>
-    </main>
+    </AppLayout>
   );
 }

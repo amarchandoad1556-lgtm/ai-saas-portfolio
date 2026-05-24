@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { UserButton } from "@clerk/nextjs";
+import toast from "react-hot-toast";
+import AppLayout from "../../components/AppLayout";
 
 export default function VideoGeneratorPage() {
   const [topic, setTopic] = useState("");
@@ -13,7 +14,7 @@ export default function VideoGeneratorPage() {
 
   const generateVideoPlan = async () => {
     if (!topic.trim()) {
-      alert("Please enter a video topic.");
+      toast.error("Please enter a video topic.");
       return;
     }
 
@@ -28,7 +29,7 @@ export default function VideoGeneratorPage() {
         },
         body: JSON.stringify({
           prompt: `
-Create a complete AI video generation plan.
+Create a complete AI video production plan.
 
 TOPIC:
 ${topic}
@@ -51,26 +52,29 @@ Generate:
 6. Voiceover narration
 7. Subtitle style
 8. Background music suggestion
-9. AI video prompts for each scene
-10. Final export checklist
-
-Make it professional, cinematic, and ready for a creator to produce.
+9. AI video prompts
+10. Export checklist
 `,
         }),
       });
 
       const data = await response.json();
 
-      setVideoPlan(data.result || data.error || "No video plan generated.");
-    } catch {
-      setVideoPlan("Something went wrong.");
+      setVideoPlan(data.result || "No video plan generated.");
+      toast.success("Video plan generated!");
+    } catch (error) {
+      console.log(error);
+      toast.error("Something went wrong.");
     }
 
     setLoading(false);
   };
 
   const saveProject = () => {
-    if (!videoPlan) return;
+    if (!videoPlan) {
+      toast.error("Nothing to save.");
+      return;
+    }
 
     const existingProjects = JSON.parse(
       localStorage.getItem("amar-ai-projects") || "[]"
@@ -80,22 +84,7 @@ Make it professional, cinematic, and ready for a creator to produce.
       id: Date.now().toString(),
       title: topic || "AI Video Project",
       type: "AI Video Plan",
-      content: `
-VIDEO TOPIC:
-${topic}
-
-STYLE:
-${style}
-
-DURATION:
-${duration}
-
-ASPECT RATIO:
-${aspectRatio}
-
-VIDEO PLAN:
-${videoPlan}
-`,
+      content: videoPlan,
       createdAt: new Date().toLocaleString(),
     };
 
@@ -104,40 +93,11 @@ ${videoPlan}
       JSON.stringify([newProject, ...existingProjects])
     );
 
-    alert("Video project saved!");
-  };
-
-  const copyPlan = async () => {
-    if (!videoPlan) return;
-
-    await navigator.clipboard.writeText(videoPlan);
-    alert("Video plan copied!");
-  };
-
-  const exportPlan = () => {
-    if (!videoPlan) return;
-
-    const file = new Blob([videoPlan], { type: "text/plain" });
-    const url = URL.createObjectURL(file);
-    const link = document.createElement("a");
-
-    link.href = url;
-    link.download = "creatorforge-video-plan.txt";
-    link.click();
-
-    URL.revokeObjectURL(url);
+    toast.success("Project saved!");
   };
 
   return (
-    <main className="min-h-screen bg-black text-white p-6 md:p-8">
-      <div className="flex justify-between items-center mb-10">
-        <a href="/dashboard" className="text-cyan-400">
-          ← Back to Dashboard
-        </a>
-
-        <UserButton />
-      </div>
-
+    <AppLayout>
       <section className="max-w-6xl mx-auto">
         <div className="mb-10">
           <div className="inline-block mb-4 px-4 py-2 rounded-full border border-cyan-400/30 bg-cyan-400/10 text-cyan-300 text-sm">
@@ -149,8 +109,8 @@ ${videoPlan}
           </h1>
 
           <p className="text-gray-400 mt-4 text-lg">
-            Create cinematic video storyboards, voiceovers, scene prompts,
-            music ideas, and export-ready video plans.
+            Create cinematic storyboards, narration, scene prompts, and
+            creator-ready video plans.
           </p>
         </div>
 
@@ -179,7 +139,6 @@ ${videoPlan}
                   <option>Motivational Story</option>
                   <option>Dark Mystery</option>
                   <option>Animated Cartoon</option>
-                  <option>Business Presentation</option>
                   <option>Shorts/Reels Style</option>
                 </select>
               </div>
@@ -218,9 +177,16 @@ ${videoPlan}
             <button
               onClick={generateVideoPlan}
               disabled={loading}
-              className="w-full mt-6 bg-cyan-500 text-black py-5 rounded-2xl font-bold text-xl disabled:opacity-50"
+              className="w-full mt-6 bg-cyan-500 text-black py-5 rounded-2xl font-bold text-xl disabled:opacity-50 flex items-center justify-center gap-3"
             >
-              {loading ? "Generating Video Plan..." : "Generate Video Plan"}
+              {loading ? (
+                <>
+                  <div className="h-5 w-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                  AI is building your video plan...
+                </>
+              ) : (
+                "Generate Video Plan"
+              )}
             </button>
           </div>
 
@@ -230,38 +196,20 @@ ${videoPlan}
             <div className="aspect-video rounded-2xl border border-white/10 bg-black flex items-center justify-center text-center p-8">
               <div>
                 <div className="text-6xl mb-4">🎬</div>
+
                 <p className="text-gray-400">
                   Real AI video rendering will connect here later.
-                </p>
-                <p className="text-gray-500 text-sm mt-3">
-                  For now, CreatorForge generates a full production plan.
                 </p>
               </div>
             </div>
 
             {videoPlan && (
-              <div className="grid md:grid-cols-3 gap-3 mt-6">
-                <button
-                  onClick={copyPlan}
-                  className="py-3 rounded-xl border border-white/10"
-                >
-                  Copy
-                </button>
-
-                <button
-                  onClick={exportPlan}
-                  className="py-3 rounded-xl bg-green-500 text-black font-bold"
-                >
-                  Export
-                </button>
-
-                <button
-                  onClick={saveProject}
-                  className="py-3 rounded-xl bg-cyan-500 text-black font-bold"
-                >
-                  Save Project
-                </button>
-              </div>
+              <button
+                onClick={saveProject}
+                className="w-full mt-6 py-4 rounded-2xl bg-cyan-500 text-black font-bold"
+              >
+                Save Project
+              </button>
             )}
           </div>
         </div>
@@ -278,6 +226,6 @@ ${videoPlan}
           </div>
         )}
       </section>
-    </main>
+    </AppLayout>
   );
 }
