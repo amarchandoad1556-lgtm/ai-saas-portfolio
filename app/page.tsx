@@ -1,155 +1,148 @@
-export default function Home() {
+import Link from "next/link";
+import { UserButton } from "@clerk/nextjs";
+
+export default function HomePage() {
+  const features = [
+    {
+      icon: "🎬",
+      title: "Script Generator",
+      desc: "Create cinematic YouTube scripts, hooks, and storytelling content.",
+    },
+    {
+      icon: "🎨",
+      title: "Thumbnail Generator",
+      desc: "Generate viral thumbnail prompts for high-click content.",
+    },
+    {
+      icon: "🎤",
+      title: "Voiceover Creator",
+      desc: "Turn scripts into clean narration and voiceover text.",
+    },
+    {
+      icon: "🧩",
+      title: "Script-to-Assets",
+      desc: "Paste any script and generate thumbnails, scenes, and voiceovers.",
+    },
+  ];
+
   return (
-    <main className="min-h-screen bg-black text-white">
+    <main className="min-h-screen bg-black text-white overflow-hidden">
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-0 left-1/4 h-96 w-96 rounded-full bg-cyan-500/20 blur-3xl" />
+        <div className="absolute bottom-0 right-0 h-96 w-96 rounded-full bg-purple-600/20 blur-3xl" />
+      </div>
 
-      {/* HERO */}
-      <section className="text-center px-6 py-28 bg-gradient-to-b from-black via-gray-900 to-black">
-        
-        <div className="inline-block px-4 py-2 mb-6 text-sm border border-white/20 rounded-full text-gray-300">
-          🚀 Available for Freelance & SaaS Projects
-        </div>
-
-        <h1 className="text-6xl font-bold leading-tight">
-          I Build Modern AI SaaS Products
+      <header className="relative z-10 flex justify-between items-center px-6 md:px-12 py-6 border-b border-white/10">
+        <h1 className="text-2xl font-bold text-cyan-400">
+          CreatorForge AI
         </h1>
 
-        <p className="text-gray-400 mt-6 text-lg max-w-2xl mx-auto">
-          Software Engineer specializing in Next.js, AI tools, automation systems, and startup-grade web apps.
+        <div className="flex items-center gap-4">
+          <Link
+            href="/dashboard"
+            className="px-5 py-2 rounded-xl bg-cyan-500 text-black font-bold"
+          >
+            Open Dashboard
+          </Link>
+
+          <UserButton />
+        </div>
+      </header>
+
+      <section className="relative z-10 px-6 md:px-12 py-24 text-center">
+        <div className="inline-block px-5 py-2 rounded-full border border-cyan-400/30 bg-cyan-400/10 text-cyan-300 text-sm">
+          AI Creator Production Platform
+        </div>
+
+        <h2 className="text-5xl md:text-7xl font-bold mt-8 max-w-5xl mx-auto leading-tight">
+          Forge Viral Content with AI
+        </h2>
+
+        <p className="text-gray-400 mt-6 max-w-3xl mx-auto text-lg md:text-xl">
+          Generate scripts, thumbnails, voiceovers, scene plans, and creator
+          projects in one powerful AI workspace.
         </p>
 
-        <div className="mt-10 flex gap-4 justify-center">
+        <div className="mt-10 flex flex-col sm:flex-row justify-center gap-4">
+          <Link
+            href="/dashboard"
+            className="px-8 py-4 rounded-2xl bg-cyan-500 text-black font-bold"
+          >
+            Start Creating
+          </Link>
+
           <a
-            href="#contact"
-            className="px-8 py-3 rounded-xl bg-cyan-500 text-black font-semibold hover:scale-105 transition"
+            href="#features"
+            className="px-8 py-4 rounded-2xl border border-white/10 bg-white/5"
           >
-            Hire Me
-          </a>
-
-          <a
-            href="https://wa.me/923000000000"
-            target="_blank"
-            className="px-8 py-3 rounded-xl border border-white/20 hover:bg-white hover:text-black transition"
-          >
-            WhatsApp Me
+            Explore Features
           </a>
         </div>
       </section>
 
-      {/* FEATURES */}
-      <section className="px-10 py-20">
-        <h2 className="text-3xl font-bold text-center mb-10">
-          What I Can Build For You
-        </h2>
+      <section id="features" className="relative z-10 px-6 md:px-12 py-20">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-4xl md:text-5xl font-bold text-center">
+            Everything Creators Need
+          </h2>
 
-        <div className="grid md:grid-cols-3 gap-6">
+          <p className="text-gray-400 text-center mt-4">
+            From idea to production assets in one workflow.
+          </p>
 
-          <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
-            <h3 className="text-xl font-bold">AI SaaS Apps</h3>
-            <p className="text-gray-400 mt-2">
-              Full-stack SaaS products with AI integrations and dashboards.
-            </p>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
+            {features.map((feature) => (
+              <div
+                key={feature.title}
+                className="p-7 rounded-3xl border border-white/10 bg-white/5"
+              >
+                <div className="text-5xl">{feature.icon}</div>
+
+                <h3 className="text-2xl font-bold mt-5">
+                  {feature.title}
+                </h3>
+
+                <p className="text-gray-400 mt-3">
+                  {feature.desc}
+                </p>
+              </div>
+            ))}
           </div>
-
-          <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
-            <h3 className="text-xl font-bold">Business Websites</h3>
-            <p className="text-gray-400 mt-2">
-              Modern landing pages that convert visitors into clients.
-            </p>
-          </div>
-
-          <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
-            <h3 className="text-xl font-bold">Automation Tools</h3>
-            <p className="text-gray-400 mt-2">
-              Systems that save time and automate business workflows.
-            </p>
-          </div>
-
         </div>
       </section>
 
-      {/* PRICING */}
-      <section className="px-10 py-20">
-        <h2 className="text-3xl font-bold text-center mb-10">
-          Freelance Packages
-        </h2>
+      <section className="relative z-10 px-6 md:px-12 py-20">
+        <div className="max-w-6xl mx-auto rounded-3xl border border-white/10 bg-white/5 p-8 md:p-12 text-center">
+          <h2 className="text-4xl md:text-5xl font-bold">
+            Built for YouTube Creators
+          </h2>
 
-        <div className="grid md:grid-cols-3 gap-6">
+          <p className="text-gray-400 mt-5 max-w-3xl mx-auto">
+            CreatorForge AI helps creators save time by turning one idea or
+            one script into content assets ready for production.
+          </p>
 
-          <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
-            <h3 className="text-xl font-bold">Basic</h3>
-            <p className="text-gray-400 mt-2">Landing page website</p>
-            <p className="text-2xl mt-4">$50 - $100</p>
+          <div className="grid md:grid-cols-5 gap-4 mt-10">
+            {["Idea", "Script", "Thumbnail", "Voiceover", "Project"].map(
+              (step, index) => (
+                <div
+                  key={step}
+                  className="p-5 rounded-2xl bg-black border border-white/10"
+                >
+                  <div className="mx-auto mb-3 h-10 w-10 rounded-full bg-cyan-500 text-black flex items-center justify-center font-bold">
+                    {index + 1}
+                  </div>
+                  <p className="font-semibold">{step}</p>
+                </div>
+              )
+            )}
           </div>
-
-          <div className="p-6 rounded-2xl bg-white/10 border border-cyan-500">
-            <h3 className="text-xl font-bold">Standard</h3>
-            <p className="text-gray-400 mt-2">Full business website</p>
-            <p className="text-2xl mt-4">$150 - $300</p>
-          </div>
-
-          <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
-            <h3 className="text-xl font-bold">Premium SaaS</h3>
-            <p className="text-gray-400 mt-2">AI SaaS application</p>
-            <p className="text-2xl mt-4">$500+</p>
-          </div>
-
         </div>
       </section>
 
-      {/* CONTACT */}
-      <section id="contact" className="px-10 py-20 text-center">
-        
-        <h2 className="text-4xl font-bold">
-          Let’s Work Together 🚀
-        </h2>
-
-        <p className="text-gray-400 mt-4">
-          Send me a message and I’ll reply within 24 hours
-        </p>
-
-        <form
-          action="https://formsubmit.co/amarchandoad1566@gmail.com"
-          method="POST"
-          className="mt-10 max-w-xl mx-auto space-y-4"
-        >
-          <input
-            type="text"
-            name="name"
-            placeholder="Your Name"
-            className="w-full p-3 rounded-xl bg-white/5 border border-white/10"
-            required
-          />
-
-          <input
-            type="email"
-            name="email"
-            placeholder="Your Email"
-            className="w-full p-3 rounded-xl bg-white/5 border border-white/10"
-            required
-          />
-
-          <textarea
-            name="message"
-            placeholder="Your Message"
-            rows={5}
-            className="w-full p-3 rounded-xl bg-white/5 border border-white/10"
-            required
-          />
-
-          <button
-            type="submit"
-            className="w-full bg-cyan-500 text-black py-3 rounded-xl font-semibold hover:scale-105 transition"
-          >
-            Send Message
-          </button>
-        </form>
-      </section>
-
-      {/* FOOTER */}
-      <footer className="text-center py-10 text-gray-500 border-t border-white/10">
-        © 2026 AI SaaS Portfolio | Built with Next.js
+      <footer className="relative z-10 border-t border-white/10 px-6 md:px-12 py-8 text-center text-gray-500">
+        © 2026 CreatorForge AI. Built for creators and storytellers.
       </footer>
-
     </main>
   );
 }
